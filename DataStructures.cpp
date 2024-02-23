@@ -60,5 +60,18 @@ void Gate::incGT() {
 void Gate::decGT() {
 	Gate::GainTot--;
 }
+std::ostream& operator<<(std::ostream& os, Gate const& g){
+	std::string nst = "";
+	Net* n;
+	for (int i = 0; i < g.nets.size(); i++) {
+		n = g.nets.at(i);
+		nst += n->name + " ";
+	}
+	return os << "[" << g.name << ", " << nst << ", " << g.Part << ", " << g.GainTot;
+}
+
+std::string Gate::getName() {
+	return Gate::name;
+}
 
 /////////////////////Bucket Structure///////////////////////////

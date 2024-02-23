@@ -25,6 +25,8 @@ public:
 	int getGT();
 	void incGT();
 	void decGT();
+	friend std::ostream& operator<<(std::ostream& os, Gate const& g);
+	std::string getName();
 
 };
 

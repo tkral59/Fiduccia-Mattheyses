@@ -12,9 +12,11 @@ private:
 	std::vector<Net*> nets;
 	bool Part;
 	int GainTot;
+	int area;
+
 public:
 	Gate();
-	Gate(std::string name, std::vector<Net*> nets, bool part, int gain);
+	Gate(std::string name, std::vector<Net*> nets, bool part, int gain, int area);
 	~Gate();
 	std::vector<Net*> getNets();
 	void addNet(Net* net);
@@ -27,6 +29,8 @@ public:
 	void decGT();
 	friend std::ostream& operator<<(std::ostream& os, Gate const& g);
 	std::string getName();
+	int getArea();
+	void setArea(int a);
 
 };
 
@@ -35,6 +39,9 @@ struct Net {
 	std::vector<Gate*> gates;
 	int p1cnt;
 	int p2cnt;
+};
+
+#endif // HEADER_HPP
 };
 
 #endif // HEADER_HPP

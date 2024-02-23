@@ -1,6 +1,8 @@
 #include <iostream>
 #include <vector>
+#include <string>
 #include "DataStructures.hpp"
+using namespace std;
 //when initializing netlist, will iterate though netlist, create nets, and generate gates if they don't already exist as we go. if exists will need to add to gate's netlist
 
 Gate::Gate() {
@@ -10,11 +12,12 @@ Gate::Gate() {
 	Gate::nets = {};
 }
 
-Gate::Gate(std::string name, std::vector<Net*> nets, bool part, int gain) {
+Gate::Gate(std::string name, std::vector<Net*> nets, bool part, int gain, int area) {
 	Gate::name = name;
 	Gate::GainTot = gain;
 	Gate::Part = part;
 	Gate::nets = nets;
+	Gate::area = area;
 }
 
 Gate::~Gate() {
@@ -38,11 +41,23 @@ void Gate::removeNet(Net* net) {
 }
 
 void Gate::setPart() {
-	Gate::Part = true;
+	if (!Gate::Part) {
+		Gate::Part = true;
+		for (int i = 0; i < Gate::nets.size(); i++) {
+			Gate::nets.at(i)->p1cnt++;
+			Gate::nets.at(i)->p2cnt--;
+		}
+	}
+	else
+		cout << "trying to setPart when already set." << endl;
 }
 
 void Gate::unsetPart() {
 	Gate::Part = false;
+	for (int i = 0; i < Gate::nets.size(); i++) {
+		Gate::nets.at(i)->p1cnt--;
+		Gate::nets.at(i)->p2cnt++;
+	}
 }
 
 bool Gate::getPart() {
@@ -67,11 +82,20 @@ std::ostream& operator<<(std::ostream& os, Gate const& g){
 		n = g.nets.at(i);
 		nst += n->name + " ";
 	}
-	return os << "[" << g.name << ", " << nst << ", " << g.Part << ", " << g.GainTot;
+	os << "[" << g.name << ", " << nst << ", " << g.Part << ", " << g.GainTot << ", " << g.area << "]";
+	return os;
 }
 
 std::string Gate::getName() {
 	return Gate::name;
+}
+
+int Gate::getArea() {
+	return Gate::area;
+}
+
+void Gate::setArea(int a) {
+	Gate::area = a;
 }
 
 /////////////////////Bucket Structure///////////////////////////

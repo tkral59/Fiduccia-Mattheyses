@@ -56,5 +56,5 @@ struct state {
     int A2; //area 2
 };
 
-float getCost(std::vector<Net> nets, std::map<std::string, Gate> gates, int& cutsize, int& AreaProduct);
+double getCost(std::vector<Net> nets, std::map<std::string, Gate> gates, double& cutsize, double& AreaProduct);
 #endif // DATASTRUCTURES_HPP

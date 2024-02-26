@@ -169,19 +169,27 @@ void Gate::unlock() {
     lock = 0;
 }
 
-float getCost(vector<Net> nets, map<string, Gate> gates,int &cutsize, int &AreaProduct) {
+double getCost(vector<Net> nets, map<string, Gate> gates,double &cutsize, double &AreaProduct) {
     cutsize = 0;
     AreaProduct = 0;
-    int P1A = 0; 
-    int P2A = 0;
+    double P1A = 0; 
+    double P2A = 0;
+    int totArea = 0;
     for (Net net : nets) {
         if (net.cut) cutsize++;
     }
     for (auto it = gates.begin(); it != gates.end(); it++) {
-        if (it->second.getPart()) P1A++;
-        else P2A++;
+        if (it->second.getPart()) P1A+=it->second.getArea();
+        else P2A+=it->second.getArea();
+        totArea += it->second.getArea();
     }
-    AreaProduct = (P1A * P2A) * 10e-12;
-    float res = (cutsize / AreaProduct);
+    AreaProduct = (P1A * P2A);// *10e-12;
+    //normalize:
+    double cmax = nets.size();
+    double num = (cutsize) / (cmax); //for now no established minimum value, set min to zero
+    double hta = totArea / 2;
+    double maxNormArea = (hta) * (hta);
+    double den = (AreaProduct) / (maxNormArea); //again no min established, if min set at zero
+    double res = (num / den);
     return res;
 }

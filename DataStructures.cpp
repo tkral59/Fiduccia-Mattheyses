@@ -7,6 +7,7 @@
 #include "DataStructures.hpp"
 using namespace std;
 
+
 Gate::Gate() {
     name = "";
     GainTot = 0;

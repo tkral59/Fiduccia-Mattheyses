@@ -55,7 +55,7 @@ void read(string netfile, string arefile, map<string, Gate>& gates, vector<Net>&
 				//we know what net we are on based on netcount
 				
 				if (words.at(1) == "s") {//if we're starting a new net
-					nnet = { "n" + to_string(netcount), {}, 0, 0 };//creates new empty net struct
+					nnet = { "n" + to_string(netcount), {}, 0, 0 , true};//creates new empty net struct
 					nets.at(netcount) = nnet; 
 					netcount++;
 				}
@@ -65,17 +65,12 @@ void read(string netfile, string arefile, map<string, Gate>& gates, vector<Net>&
 				//then add gate to gate map if needed, add net to gates net* list
 				
 				if (gates.count(words.at(0)) != 1) {//if gate is not in map
-					ngate = Gate(words.at(0), {}, false, 0, 0); //all gates will start with an empty net* vect, be in part 2, have gain of 0
+					ngate = Gate(words.at(0), {}, false, 0, 0, 0); //all gates will start with an empty net* vect, be in part 2, have gain of 0
 					gates.insert(pair<string, Gate>(words.at(0), ngate)); //add new gate to map
 				}
-				else
-					ngate = gates[words.at(0)];
 				//add gate to nets gate list, and vice versa
-				gates[words.at(0)].addNet(&nets.at(netcount - 1));
-				
-				//std::map::const_iterator pos;
 				nets.at(netcount - 1).gates.push_back(&gates[words.at(0)]);
-				nets.at(netcount - 1).p2cnt++;
+				gates[words.at(0)].addNet(&nets.at(netcount - 1));
 			}
 
 		}
@@ -109,7 +104,9 @@ void read(string netfile, string arefile, map<string, Gate>& gates, vector<Net>&
 	}
 }
 
-void randInitParts(map<string, Gate> &gm, int gtotal) {
+
+
+void randInitParts(map<string, Gate> &gm, int gtotal, state &s) {
 	random_device rd;
 	mt19937 gen(rd());
 	uniform_int_distribution<> dis(0, gtotal - 1);
@@ -122,7 +119,12 @@ void randInitParts(map<string, Gate> &gm, int gtotal) {
 		chosen.insert(index);
 		auto it = std::next(gm.begin(), index);
 		it->second.setPart();
-		
+		s.P1.push_back((&it->second));
+	}
+	for (auto it = gm.begin(); it != gm.end(); it++) {
+		if (chosen.count(distance(gm.begin(), it)) == 0) {
+			s.P2.push_back(&it->second);
+		}
 	}
 }
 
@@ -131,8 +133,15 @@ int main() {
 	vector<Net> ns = {};
 	int nt = 0;
 	int nodt = 0;
+	state s;
 	read("ibm01.net", "ibm01.are", gm, ns, nt, nodt);
-	randInitParts(gm, nodt);
+	randInitParts(gm, nodt, s);
+	int cs = 0;
+	int ap = 0;
+	int cost = getCost(ns, gm, cs, ap);
+	
+	/*
+	cout << "Nets:" << endl;
 	for (int i = 0; i < ns.size(); i++) {
 		cout << ns.at(i).name;
 		for (int j = 0; j < ns.at(i).gates.size(); j++) {
@@ -141,9 +150,30 @@ int main() {
 		}
 		cout << " Partition1 count:" << ns.at(i).p1cnt << " Partition2 count:" << ns.at(i).p2cnt << endl;
 	}
+	*/
+	/*
 	cout << "Map of Gates:" << endl;
 	for (const auto& myPair : gm) {
 		cout << "gm[" << myPair.first << "]: ";
 		cout << myPair.second << endl;
 	}
+	*/
+	/*
+	cout << "Partitions:" << endl;
+	int mrange = s.P1.size();
+	if (mrange < s.P2.size())
+		mrange = s.P2.size();
+	cout << "P1:\t" << "P2:" << endl;
+	for (int i = 0; i < mrange; i++) {
+		if (i < s.P1.size())
+			cout << *s.P1.at(i);
+		cout << "\t";
+		if (i < s.P2.size())
+			cout << *s.P2.at(i);
+		cout << endl;
+	}
+	*/
+	
+	cout << cost << endl;
+	cout << "test" << endl;
 }

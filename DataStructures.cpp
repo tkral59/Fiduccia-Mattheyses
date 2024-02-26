@@ -2,7 +2,11 @@
 #include <vector>
 #include <string>
 #include <algorithm>
+#include <map>
+#include <cmath>
 #include "DataStructures.hpp"
+using namespace std;
+
 
 Gate::Gate() {
     name = "";
@@ -12,12 +16,13 @@ Gate::Gate() {
     area = 0;
 }
 
-Gate::Gate(std::string name, vector<Net*> nets, bool part, int gain, int area) {
+Gate::Gate(std::string name, vector<Net*> nets, bool part, int gain, int area, int lock=0) {
     this->name = name;
     this->GainTot = gain;
     this->Part = part;
     this->nets = nets;
     this->area = area;
+    this->lock = lock;
 }
 
 Gate::~Gate() {
@@ -41,23 +46,6 @@ void Gate::addNet(Net* net) {
 }
 
 void Gate::removeNet(Net* net) {
-    for (size_t i = 0; i < nets.size(); ++i) {
-        if (nets[i] == net) {
-            nets.erase(nets.begin() + i);
-            // Adjust p1cnt or p2cnt based on the gate's current partition
-            if (Part) {
-                net->p1cnt--;
-            } else {
-                net->p2cnt--;
-            }
-            // Recalculate gains for all gates in this net
-            Gate::updateGainsAfterMove(this);
-            break;
-        }
-    }
-}
-
-vvoid Gate::removeNet(Net* net) {
     for (size_t i = 0; i < nets.size(); ++i) {
         if (nets[i] == net) {
             nets.erase(nets.begin() + i);
@@ -147,10 +135,18 @@ void Gate::calculateInitialGain() {
         int p2cnt = net->p2cnt;
         if (Part) { // Gate is in partition 1
             if (p1cnt == 1) gain++;
-            if (p2cnt == 0) gain--;
+            if (p2cnt == 0) {
+                gain--;
+                net->cut = false;
+            }
+            else net->cut = true;
         } else { // Gate is in partition 2
             if (p2cnt == 1) gain++;
-            if (p1cnt == 0) gain--;
+            if (p1cnt == 0) {
+                gain--;
+                net->cut = false;
+            }
+            else net->cut = true;
         }
     }
     GainTot = gain;
@@ -158,16 +154,34 @@ void Gate::calculateInitialGain() {
 
 void Gate::updateGainsAfterMove(Gate* movedGate) {
     for (Net* net : movedGate->getNets()) {
-        if (movedGate->getPart()) {
-            net->p1cnt++;
-            net->p2cnt--;
-        } else {
-            net->p1cnt--;
-            net->p2cnt++;
-        }
         // Update the gains of all gates on those nets
         for (Gate* gate : net->gates) {
             gate->calculateInitialGain(); // Recalculates gain
         }
     }
+}
+
+void Gate::Lock() {
+    lock = 1;
+}
+
+void Gate::unlock() {
+    lock = 0;
+}
+
+float getCost(vector<Net> nets, map<string, Gate> gates,int &cutsize, int &AreaProduct) {
+    cutsize = 0;
+    AreaProduct = 0;
+    int P1A = 0; 
+    int P2A = 0;
+    for (Net net : nets) {
+        if (net.cut) cutsize++;
+    }
+    for (auto it = gates.begin(); it != gates.end(); it++) {
+        if (it->second.getPart()) P1A++;
+        else P2A++;
+    }
+    AreaProduct = (P1A * P2A) * 10e-12;
+    float res = (cutsize / AreaProduct);
+    return res;
 }

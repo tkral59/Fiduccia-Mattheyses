@@ -136,9 +136,9 @@ int main() {
 	state s;
 	read("ibm01.net", "ibm01.are", gm, ns, nt, nodt);
 	randInitParts(gm, nodt, s);
-	int cs = 0;
-	int ap = 0;
-	int cost = getCost(ns, gm, cs, ap);
+	double cs = 0;
+	double ap = 0;
+	double cost = getCost(ns, gm, cs, ap);
 	
 	/*
 	cout << "Nets:" << endl;
@@ -177,3 +177,4 @@ int main() {
 	cout << cost << endl;
 	cout << "test" << endl;
 }
+
